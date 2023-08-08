@@ -1,0 +1,315 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>SSFM</title><meta name="generator" content="MATLAB 9.13"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2023-02-13"><meta name="DC.source" content="SSFM.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#3">Constants</a></li><li><a href="#4">Part 1</a></li><li><a href="#5">Part 2</a></li></ul></div><pre class="codeinput"><span class="comment">% Danesh Abdollahi - 9723053 - Optical Communication Systems - Fall 2022</span>
+</pre><pre class="codeinput">clc; clear; close <span class="string">all</span>;
+</pre><h2 id="3">Constants</h2><pre class="codeinput">p0 = 5e-3;  <span class="comment">% watt</span>
+gamma = 1.2;  <span class="comment">% 1/km</span>
+beta2 = -21.6e-24;  <span class="comment">% s^2/km</span>
+l = 500;  <span class="comment">% Km</span>
+t0_2 = abs(beta2) / (gamma * p0);  <span class="comment">% s^2</span>
+t0 = sqrt(t0_2);  <span class="comment">% s</span>
+Ts = 1e-12;
+t = -1e-9 : Ts : 1e-9 - Ts ;
+fs = 1 / Ts ;
+
+dz = 0.1;  <span class="comment">% km</span>
+num_of_steps = round(l / dz);
+
+C = 0 ; <span class="comment">% chirp</span>
+</pre><h2 id="4">Part 1</h2><pre class="codeinput">input_pulse = sqrt(p0) .* sech(t/t0);
+df = fs / length( t ) ;
+freq = -fs/2 : df : (fs/2) - df ;
+
+output_symmetric = fftshift(fft(input_pulse)) ;
+<span class="keyword">for</span> i = 1 : num_of_steps
+    output_symmetric = D_operator(output_symmetric, beta2, dz/2, freq);
+    output_symmetric = ifft(fftshift(output_symmetric));
+    output_symmetric = N_operator(output_symmetric, gamma, dz) ;
+    output_symmetric = fftshift(fft(output_symmetric));
+    output_symmetric = D_operator(output_symmetric, beta2, dz/2, freq);
+<span class="keyword">end</span>
+output_symmetric = ifft(fftshift(output_symmetric));
+
+<span class="comment">% Asymetric</span>
+output_asymmetric = fftshift(fft(input_pulse)) ;
+<span class="keyword">for</span> i = 1 : num_of_steps
+    output_asymmetric = D_operator(output_asymmetric, beta2, dz, freq);
+    output_asymmetric = ifft(fftshift(output_asymmetric));
+    output_asymmetric = N_operator(output_asymmetric, gamma, dz) ;
+    output_asymmetric = fftshift(fft(output_asymmetric));
+<span class="keyword">end</span>
+output_asymmetric = ifft(fftshift(output_asymmetric));
+
+figure();
+subplot(2,1,1);
+plot(t * 1e9, input_pulse, LineWidth=1.3, Color=<span class="string">"red"</span>, LineStyle=<span class="string">"-"</span>);
+hold <span class="string">on</span>;
+plot(t * 1e9, abs(output_symmetric), LineWidth=1.3, Color=<span class="string">"blue"</span>, LineStyle=<span class="string">"-."</span>);
+grid <span class="string">minor</span> ;
+title(<span class="string">"Pulse Evolution (Soliton Pulse) (Symmetric)"</span>);
+xlabel(<span class="string">"Time (ns)"</span>);
+ylabel(<span class="string">"Magnitude"</span>);
+legend(<span class="string">"Input Pulse"</span>, <span class="string">"Output Pulse"</span>);
+
+subplot(2,1,2);
+plot(t * 1e9, input_pulse, LineWidth=1.3, Color=<span class="string">"red"</span>, LineStyle=<span class="string">"-"</span>);
+hold <span class="string">on</span>;
+plot(t * 1e9, abs(output_asymmetric), LineWidth=1.3, Color=<span class="string">"blue"</span>, LineStyle=<span class="string">"-."</span>);
+grid <span class="string">minor</span>;
+title(<span class="string">"Pulse Evolution (Soliton Pulse) (Asymmetric)"</span>);
+xlabel(<span class="string">"Time (ns)"</span>);
+ylabel(<span class="string">"Magnitude"</span>);
+legend(<span class="string">"Input Pulse"</span>, <span class="string">"Output Pulse"</span>);
+</pre><img vspace="5" hspace="5" src="SSFM_01.png" alt=""> <h2 id="5">Part 2</h2><pre class="codeinput">input_pulse = sqrt(p0) .* exp( -((1 + 1i * C) / (2*t0_2)) * t.^2 );
+df = fs / length( t ) ;
+freq = -fs/2 : df : (fs/2) - df ;
+
+<span class="comment">% Symmetric</span>
+output_symmetric = fftshift(fft(input_pulse)) ;
+<span class="keyword">for</span> i = 1 : num_of_steps
+    output_symmetric = D_operator(output_symmetric, beta2, dz/2, freq);
+    output_symmetric = ifft(fftshift(output_symmetric));
+    output_symmetric = N_operator(output_symmetric, gamma, dz) ;
+    output_symmetric = fftshift(fft(output_symmetric));
+    output_symmetric = D_operator(output_symmetric, beta2, dz/2, freq);
+<span class="keyword">end</span>
+output_symmetric = ifft(fftshift(output_symmetric));
+
+<span class="comment">% Asymetric</span>
+output_asymmetric = fftshift(fft(input_pulse)) ;
+<span class="keyword">for</span> i = 1 : num_of_steps
+    output_asymmetric = D_operator(output_asymmetric, beta2, dz, freq);
+    output_asymmetric = ifft(fftshift(output_asymmetric));
+    output_asymmetric = N_operator(output_asymmetric, gamma, dz) ;
+    output_asymmetric = fftshift(fft(output_asymmetric));
+<span class="keyword">end</span>
+output_asymmetric = ifft(fftshift(output_asymmetric));
+
+figure();
+subplot(2,1,1);
+plot(t * 1e9, input_pulse, LineWidth=1.3, Color=<span class="string">"red"</span>, LineStyle=<span class="string">"-"</span>);
+hold <span class="string">on</span>;
+plot(t * 1e9, abs(output_symmetric), LineWidth=1.3, Color=<span class="string">"blue"</span>, LineStyle=<span class="string">"-."</span>);
+grid <span class="string">minor</span> ;
+title(<span class="string">"Pulse Evolution (Gaussian Pulse) (Symmetric)"</span>);
+xlabel(<span class="string">"Time (ns)"</span>);
+ylabel(<span class="string">"Magnitude"</span>);
+legend(<span class="string">"Input Pulse"</span>, <span class="string">"Output Pulse"</span>);
+
+subplot(2,1,2);
+plot(t * 1e9, input_pulse, LineWidth=1.3, Color=<span class="string">"red"</span>,LineStyle=<span class="string">"-"</span>);
+hold <span class="string">on</span>;
+plot(t * 1e9, abs(output_asymmetric), LineWidth=1.3, Color=<span class="string">"blue"</span>, LineStyle=<span class="string">"-."</span>);
+grid <span class="string">minor</span> ;
+title(<span class="string">"Pulse Evolution (Gaussian Pulse) (Asymmetric)"</span>);
+xlabel(<span class="string">"Time (ns)"</span>);
+ylabel(<span class="string">"Magnitude"</span>);
+legend(<span class="string">"Input Pulse"</span>, <span class="string">"Output Pulse"</span>);
+
+
+<span class="comment">% Functions</span>
+<span class="keyword">function</span> output = D_operator(input, beta2, dz, freq)
+    D_freq = exp(1i * beta2 * dz * ((2*pi*freq).^2) / 2 );
+    output = input .* D_freq ;
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> output = N_operator(input, gamma, dz)
+    N = exp( 1i * 8 * gamma * dz * (abs(input).^2) / 9 );
+    output = input .* N ;
+<span class="keyword">end</span>
+</pre><img vspace="5" hspace="5" src="SSFM_02.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% Danesh Abdollahi - 9723053 - Optical Communication Systems - Fall 2022
+%%
+clc; clear; close all;
+
+%% Constants
+p0 = 5e-3;  % watt
+gamma = 1.2;  % 1/km
+beta2 = -21.6e-24;  % s^2/km
+l = 500;  % Km
+t0_2 = abs(beta2) / (gamma * p0);  % s^2
+t0 = sqrt(t0_2);  % s
+Ts = 1e-12; 
+t = -1e-9 : Ts : 1e-9 - Ts ;
+fs = 1 / Ts ;
+
+dz = 0.1;  % km
+num_of_steps = round(l / dz);
+
+C = 0 ; % chirp
+
+%% Part 1
+input_pulse = sqrt(p0) .* sech(t/t0);
+df = fs / length( t ) ;
+freq = -fs/2 : df : (fs/2) - df ;
+
+output_symmetric = fftshift(fft(input_pulse)) ;
+for i = 1 : num_of_steps 
+    output_symmetric = D_operator(output_symmetric, beta2, dz/2, freq);
+    output_symmetric = ifft(fftshift(output_symmetric));
+    output_symmetric = N_operator(output_symmetric, gamma, dz) ;
+    output_symmetric = fftshift(fft(output_symmetric));
+    output_symmetric = D_operator(output_symmetric, beta2, dz/2, freq);
+end
+output_symmetric = ifft(fftshift(output_symmetric));
+
+% Asymetric
+output_asymmetric = fftshift(fft(input_pulse)) ;
+for i = 1 : num_of_steps 
+    output_asymmetric = D_operator(output_asymmetric, beta2, dz, freq);
+    output_asymmetric = ifft(fftshift(output_asymmetric));
+    output_asymmetric = N_operator(output_asymmetric, gamma, dz) ;
+    output_asymmetric = fftshift(fft(output_asymmetric));
+end
+output_asymmetric = ifft(fftshift(output_asymmetric));
+
+figure();
+subplot(2,1,1);
+plot(t * 1e9, input_pulse, LineWidth=1.3, Color="red", LineStyle="-");
+hold on;
+plot(t * 1e9, abs(output_symmetric), LineWidth=1.3, Color="blue", LineStyle="-.");
+grid minor ;
+title("Pulse Evolution (Soliton Pulse) (Symmetric)");
+xlabel("Time (ns)");
+ylabel("Magnitude");
+legend("Input Pulse", "Output Pulse");
+
+subplot(2,1,2);
+plot(t * 1e9, input_pulse, LineWidth=1.3, Color="red", LineStyle="-");
+hold on;
+plot(t * 1e9, abs(output_asymmetric), LineWidth=1.3, Color="blue", LineStyle="-.");
+grid minor;
+title("Pulse Evolution (Soliton Pulse) (Asymmetric)");
+xlabel("Time (ns)");
+ylabel("Magnitude");
+legend("Input Pulse", "Output Pulse");
+
+%% Part 2
+input_pulse = sqrt(p0) .* exp( -((1 + 1i * C) / (2*t0_2)) * t.^2 );
+df = fs / length( t ) ;
+freq = -fs/2 : df : (fs/2) - df ;
+
+% Symmetric
+output_symmetric = fftshift(fft(input_pulse)) ;
+for i = 1 : num_of_steps 
+    output_symmetric = D_operator(output_symmetric, beta2, dz/2, freq);
+    output_symmetric = ifft(fftshift(output_symmetric));
+    output_symmetric = N_operator(output_symmetric, gamma, dz) ;
+    output_symmetric = fftshift(fft(output_symmetric));
+    output_symmetric = D_operator(output_symmetric, beta2, dz/2, freq);
+end
+output_symmetric = ifft(fftshift(output_symmetric));
+
+% Asymetric
+output_asymmetric = fftshift(fft(input_pulse)) ;
+for i = 1 : num_of_steps 
+    output_asymmetric = D_operator(output_asymmetric, beta2, dz, freq);
+    output_asymmetric = ifft(fftshift(output_asymmetric));
+    output_asymmetric = N_operator(output_asymmetric, gamma, dz) ;
+    output_asymmetric = fftshift(fft(output_asymmetric));
+end
+output_asymmetric = ifft(fftshift(output_asymmetric));
+
+figure();
+subplot(2,1,1);
+plot(t * 1e9, input_pulse, LineWidth=1.3, Color="red", LineStyle="-");
+hold on;
+plot(t * 1e9, abs(output_symmetric), LineWidth=1.3, Color="blue", LineStyle="-.");
+grid minor ;
+title("Pulse Evolution (Gaussian Pulse) (Symmetric)");
+xlabel("Time (ns)");
+ylabel("Magnitude");
+legend("Input Pulse", "Output Pulse");
+
+subplot(2,1,2);
+plot(t * 1e9, input_pulse, LineWidth=1.3, Color="red",LineStyle="-");
+hold on;
+plot(t * 1e9, abs(output_asymmetric), LineWidth=1.3, Color="blue", LineStyle="-.");
+grid minor ;
+title("Pulse Evolution (Gaussian Pulse) (Asymmetric)");
+xlabel("Time (ns)");
+ylabel("Magnitude");
+legend("Input Pulse", "Output Pulse");
+
+
+% Functions
+function output = D_operator(input, beta2, dz, freq)
+    D_freq = exp(1i * beta2 * dz * ((2*pi*freq).^2) / 2 );
+    output = input .* D_freq ;
+end
+
+function output = N_operator(input, gamma, dz)
+    N = exp( 1i * 8 * gamma * dz * (abs(input).^2) / 9 );
+    output = input .* N ;
+end
+
+##### SOURCE END #####
+--></body></html>
